@@ -20,5 +20,7 @@ class Departemen extends Model
         'nama_departemen'
     ];
 
+    
+
     protected $guarded = [];
 }

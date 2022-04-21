@@ -458,44 +458,45 @@ class AbsensiController extends Controller
     }
 
     public function detail_presensi(Request $request){
-
+        
         $dateFirst = $this->getBetweenDate($request->id_bulan, true);
         $dateEnd = $this->getBetweenDate($request->id_bulan, false);
-
+        
         $bulan = DB::table('bulans')->where('id_bulan',$request->id_bulan)->first();
-
+        
         $presensi = DB::table('presensi_logs')
-                ->join('users','users.nik','=','presensi_logs.nik')
-                ->join('karyawans','karyawans.nik','=','presensi_logs.nik')
-                ->leftJoin('lemburs','lemburs.id_lembur','=','presensi_logs.id_lembur')
-                ->leftJoin('lembur_khususes','lembur_khususes.id_lembur_khusus','=','presensi_logs.id_lembur_khusus')
-                ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona', 'karyawans.id_regu','karyawans.id_jabatan',
-                'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto',
-                'presensi_logs.id_presensi','presensi_logs.nik', 'presensi_logs.tanggal', 'presensi_logs.jadwal_kerja', 'presensi_logs.check_in','presensi_logs.check_out', 'presensi_logs.detail','presensi_logs.id_lembur','presensi_logs.id_lembur_khusus','presensi_logs.id_absensi',
-                'lemburs.total_jam_lembur','lembur_khususes.total_jam_lembur_khusus','lemburs.detail_lembur','lembur_khususes.detail_lembur_khusus')
-                ->where('presensi_logs.nik', auth()->user()->karyawan->nik)
-                ->whereRaw('presensi_logs.tanggal >= ? and presensi_logs.tanggal <= ?',[$dateFirst,$dateEnd])
-                ->orderBy('presensi_logs.tanggal', 'asc')
-                ->get();
-
+        ->join('users','users.nik','=','presensi_logs.nik')
+        ->join('karyawans','karyawans.nik','=','presensi_logs.nik')
+        ->leftJoin('lemburs','lemburs.id_lembur','=','presensi_logs.id_lembur')
+        ->leftJoin('lembur_khususes','lembur_khususes.id_lembur_khusus','=','presensi_logs.id_lembur_khusus')
+        ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona', 'karyawans.id_regu','karyawans.id_jabatan',
+        'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto',
+        'presensi_logs.id_presensi','presensi_logs.nik', 'presensi_logs.tanggal', 'presensi_logs.jadwal_kerja', 'presensi_logs.check_in','presensi_logs.check_out', 'presensi_logs.detail','presensi_logs.id_lembur','presensi_logs.id_lembur_khusus','presensi_logs.id_absensi',
+        'lemburs.total_jam_lembur','lembur_khususes.total_jam_lembur_khusus','lemburs.detail_lembur','lembur_khususes.detail_lembur_khusus')
+        ->where('presensi_logs.nik', auth()->user()->karyawan->nik)
+        ->whereRaw('presensi_logs.tanggal >= ? and presensi_logs.tanggal <= ?',[$dateFirst,$dateEnd])
+        ->orderBy('presensi_logs.tanggal', 'asc')
+        ->get();
+        
         $dt_kar= DB::table('karyawans')
-                ->join('users', 'users.nik' ,'=', 'karyawans.nik')
-                ->join('zonas', 'zonas.id_zona', '=', 'karyawans.id_zona')
-                ->join('regus', 'regus.id_regu', '=', 'karyawans.id_regu')
-                ->join('jabatans', 'jabatans.id_jabatan', '=', 'karyawans.id_jabatan')
-                ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona','zonas.nama_zona', 'karyawans.id_regu','regus.nama_regu','jabatans.nama_jabatan','karyawans.id_jabatan',
-                'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto')
-                ->where('karyawans.nik', auth()->user()->karyawan->nik)
-                ->get();
-
+        ->join('users', 'users.nik' ,'=', 'karyawans.nik')
+        ->join('zonas', 'zonas.id_zona', '=', 'karyawans.id_zona')
+        ->join('regus', 'regus.id_regu', '=', 'karyawans.id_regu')
+        ->join('jabatans', 'jabatans.id_jabatan', '=', 'karyawans.id_jabatan')
+        ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona','zonas.nama_zona', 'karyawans.id_regu','regus.nama_regu','jabatans.nama_jabatan','karyawans.id_jabatan',
+        'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto')
+        ->where('karyawans.nik', auth()->user()->karyawan->nik)
+        ->get();
+        
+        
         $pt = DB::table('karyawans')->where('nik', auth()->user()->karyawan->nik)->first();
-
+       
         $datetime1 = new DateTime($dateFirst);
         $datetime2 = new DateTime($dateEnd);
-
+        
         $interval = $datetime1->diff($datetime2);
         $total_hari = $interval->format('%a');
-
+        
         $cuti = DB::table('absensi_logs')
                 ->where('nik', auth()->user()->karyawan->nik)
                 ->where('tipe_absen','=','Cuti')
@@ -548,8 +549,121 @@ class AbsensiController extends Controller
                 ->whereRaw('tgl_lembur_khusus >= ? and tgl_lembur_khusus <= ?',[$dateFirst,$dateEnd])
                 ->sum('total_jam_lembur_khusus');
 
-
+                // dd($request->id_bulan);
         return view('absensi/detail_presensi',
+            [
+                'data_absen' => $presensi,
+                'bulan' => $bulan,
+                'cuti' => $cuti,
+                'dispensasi' => $dispensasi,
+                'sakit' => $sakit,
+                'ijin' => $ijin,
+                'mangkir' => $mangkir,
+                'hadir' => $hadir,
+                'spl' => $total_spl,
+                'lk' => $total_lk,
+                'pt' => $pt,
+                'data_karyawan' => $dt_kar,
+                'date_first' => $dateFirst,
+                'date_end' => $dateEnd,
+            ]);
+    }
+
+    public function webview_detail_presensi(Request $request){
+        
+        $dateFirst = $this->getBetweenDate($request->id_bulan, true);
+        $dateEnd = $this->getBetweenDate($request->id_bulan, false);
+        $nik_karyawan = $request->nik;
+        // dd(auth()->user()->karyawan->nik);
+        $bulan = DB::table('bulans')->where('id_bulan',$request->id_bulan)->first();
+        
+        $presensi = DB::table('presensi_logs')
+        ->join('users','users.nik','=','presensi_logs.nik')
+        ->join('karyawans','karyawans.nik','=','presensi_logs.nik')
+        ->leftJoin('lemburs','lemburs.id_lembur','=','presensi_logs.id_lembur')
+        ->leftJoin('lembur_khususes','lembur_khususes.id_lembur_khusus','=','presensi_logs.id_lembur_khusus')
+        ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona', 'karyawans.id_regu','karyawans.id_jabatan',
+        'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto',
+        'presensi_logs.id_presensi','presensi_logs.nik', 'presensi_logs.tanggal', 'presensi_logs.jadwal_kerja', 'presensi_logs.check_in','presensi_logs.check_out', 'presensi_logs.detail','presensi_logs.id_lembur','presensi_logs.id_lembur_khusus','presensi_logs.id_absensi',
+        'lemburs.total_jam_lembur','lembur_khususes.total_jam_lembur_khusus','lemburs.detail_lembur','lembur_khususes.detail_lembur_khusus')
+        ->where('presensi_logs.nik', $nik_karyawan)
+        ->whereRaw('presensi_logs.tanggal >= ? and presensi_logs.tanggal <= ?',[$dateFirst,$dateEnd])
+        ->orderBy('presensi_logs.tanggal', 'asc')
+        ->get();
+        
+        $dt_kar= DB::table('karyawans')
+        ->join('users', 'users.nik' ,'=', 'karyawans.nik')
+        ->join('zonas', 'zonas.id_zona', '=', 'karyawans.id_zona')
+        ->join('regus', 'regus.id_regu', '=', 'karyawans.id_regu')
+        ->join('jabatans', 'jabatans.id_jabatan', '=', 'karyawans.id_jabatan')
+        ->select('karyawans.pt','karyawans.id_karyawan','karyawans.nik', 'karyawans.nama_lengkap','karyawans.id_zona','zonas.nama_zona', 'karyawans.id_regu','regus.nama_regu','jabatans.nama_jabatan','karyawans.id_jabatan',
+        'karyawans.tgl_lahir','karyawans.alamat','karyawans.no_hp','karyawans.no_ktp','karyawans.tgl_jatuhtempo_gada','karyawans.status_aktif','users.foto')
+        ->where('karyawans.nik', $nik_karyawan)
+        ->get();
+        
+        
+        $pt = DB::table('karyawans')->where('nik', $nik_karyawan)->first();
+       
+        $datetime1 = new DateTime($dateFirst);
+        $datetime2 = new DateTime($dateEnd);
+        
+        $interval = $datetime1->diff($datetime2);
+        $total_hari = $interval->format('%a');
+        
+        $cuti = DB::table('absensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->where('tipe_absen','=','Cuti')
+                ->whereRaw('tgl_absen >= ? and tgl_absen <= ?',[$dateFirst,$dateEnd])
+                ->count();
+        $dispensasi = DB::table('absensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->where('tipe_absen','=','Dispensasi')
+                ->whereRaw('tgl_absen >= ? and tgl_absen <= ?',[$dateFirst,$dateEnd])
+                ->count();
+        $sakit = DB::table('absensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->where('tipe_absen','=','Sakit')
+                ->whereRaw('tgl_absen >= ? and tgl_absen <= ?',[$dateFirst,$dateEnd])
+                ->count();
+        $ijin = DB::table('absensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->where('tipe_absen','=','Ijin')
+                ->where('terbit','=',1)
+                ->whereRaw('tgl_absen >= ? and tgl_absen <= ?',[$dateFirst,$dateEnd])
+                ->count();
+
+        $off = DB::table('presensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->where('jadwal_kerja','=','OFF')
+                ->whereRaw('tanggal >= ? and tanggal <= ?',[$dateFirst,$dateEnd])
+                ->count();
+
+        $total_absen = DB::table('presensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->whereRaw('tanggal >= ? and tanggal <= ?',[$dateFirst,$dateEnd])
+                ->count('detail');
+
+        $hadir = DB::table('presensi_logs')
+                ->where('nik', $nik_karyawan)
+                ->whereRaw('tanggal >= ? and tanggal <= ?',[$dateFirst,$dateEnd])
+                ->count('lat');
+
+        $mangkir = ($total_hari+1)-($off+$total_absen+$hadir);
+
+        $total_spl = DB::table('lemburs')
+                ->where('nik', $nik_karyawan)
+                ->where('terbit','=',1)
+                ->whereRaw('tgl_lembur >= ? and tgl_lembur <= ?',[$dateFirst,$dateEnd])
+                ->sum('total_jam_lembur');
+
+        $total_lk = DB::table('lembur_khususes')
+                ->where('nik', $nik_karyawan)
+                ->where('terbit','=',1)
+                ->whereRaw('tgl_lembur_khusus >= ? and tgl_lembur_khusus <= ?',[$dateFirst,$dateEnd])
+                ->sum('total_jam_lembur_khusus');
+
+                // dd($request->id_bulan);
+        return view('webview/detail_presensi',
             [
                 'data_absen' => $presensi,
                 'bulan' => $bulan,

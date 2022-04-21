@@ -65,7 +65,7 @@ class AuthController extends Controller
                 return response()->json([
                 	'success' => false,
                 	'message' => 'Login credentials are invalid.',
-                ], 400);
+                ], 401);
             }
         } catch (JWTException $e) {
     	return $credentials;

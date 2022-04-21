@@ -336,6 +336,6 @@ Route::get('maps/android', function () {
 });
 
 Route::get('maps/android/absen', [HomeController::class, 'dash_absen'])->name('dash_absen');
-
+Route::get('webview/detail_presensi/{id_bulan}',[AbsensiController::class, 'webview_detail_presensi'])->name('webview_detail_presensi');
 
 Route::get('/lokasi', [LocationController::class, 'lokasi'])->name('lokasi');

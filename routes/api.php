@@ -46,4 +46,18 @@ Route::post('user/sakit_submit','AbsenController@sakit_submit');
 Route::post('user/lembur_submit','AbsenController@lembur_submit');
 Route::post('user/lemburkhusus_submit','AbsenController@lemburkhusus_submit');
 
+Route::get('user/data_jadwal','AbsenController@data_jadwal');
+Route::get('user/get_jadwal','AbsenController@get_jadwal');
+
+//list absen
+Route::get('user/list_absen','AbsenController@list_absen');
+Route::get('user/list_absen_detail','AbsenController@list_absen_detail');
+
+//list lembur
+Route::get('user/list_lembur','AbsenController@list_lembur');
+Route::get('user/list_lembur_detail','AbsenController@list_lembur_detail');
+
+//list lembur khusus
+Route::get('user/list_lembur_khusus','AbsenController@list_lembur_khusus');
+Route::get('user/list_lembur_khusus_detail','AbsenController@list_lembur_khusus_detail');
 

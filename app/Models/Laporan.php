@@ -42,5 +42,9 @@ class Laporan extends Model
         return $this->belongsTo(LaporanBukti::class, 'id_laporan', 'id_laporan');
     }
 
+    public function departemen(){
+        return $this->belongsTo(Departemen::class, 'id_departemen', 'id_departemen');
+    }
+
     protected $guarded = [];
 }

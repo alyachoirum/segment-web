@@ -13,24 +13,28 @@ use Illuminate\Support\Facades\Validator;
 class LaporanController extends Controller
 {
     public function store(Request $request){
-
+        // dd($request->tingkat);
+        // dd($request->id_departemen);
+        // $departemen = Departemen::where()
     try{
         $laporan                   = new Laporan();
         // $laporan->tanggal          = $request->tanggal;
         $laporan->judul_laporan    = $request->judul_laporan;
         $laporan->id_kategori      = $request->id_kategori;
         $laporan->prioritas        = $request->prioritas;
-        $laporan->deskripsi        = $request->deskripsi;
+        // $laporan->deskripsi        = $request->deskripsi;
         $laporan->tingkat          = $request->tingkat;
-        $request->id_departemen    = $request->id_departemen;
-        $request->appv1            = $request->appv1 == "" ? null : $request->appv1;
-        $request->appv2            = $request->appv2 == "" ? null : $request->appv2;
-        $request->appv3            = $request->appv3 == "" ? null : $request->appv3;
+        $laporan->id_departemen    = $request->id_departemen;
+        $laporan->appv1            = $request->appv1 == "" ? null : $request->appv1;
+        $laporan->appv2            = $request->appv2 == "" ? null : $request->appv2;
+        $laporan->appv3            = $request->appv3 == "" ? null : $request->appv3;
+        $laporan->id_zona          = $request->id_zona == "" ? null : $request->id_zona;
         $laporan->publish          = $request->publish;
         $laporan->nik              = $request->nik;
         $laporan->lat              = $request->lat;
         $laporan->lng              = $request->lng;
         $laporan->save();
+        // dd($laporan->tingkat);
 
         //data foto dalam bentuk array base64
         $foto = json_decode($request->foto);

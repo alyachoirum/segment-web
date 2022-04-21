@@ -26,7 +26,7 @@ class CheckinController extends Controller
     public function get_user(Request $request)
     {
         $response = Karyawan::with([
-                    'user:nik,email,foto,id_level_user',
+                    'user:nik,email,foto,id_level_user,id_departemen',
                     'regu:id_regu,nama_regu',
                     'zona:id_zona,nama_zona',
                     'jabatan:id_jabatan,nama_jabatan,direct_jab_atasan,direct_jab_atasan_2',
