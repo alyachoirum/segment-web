@@ -35,16 +35,23 @@ class CheckinController extends Controller
                     ->where('id_karyawan', $request->id_karyawan)
                     ->first();
 
-
         $tanggal    = Carbon::now()->isoFormat('D');
+        $hari    = Carbon::now()->isoFormat('l');
         $bulan      = Carbon::now()->isoFormat('M');
         $tahun      = Carbon::now()->isoFormat('Y');
         $campur = Carbon::now()->format('Y-m-d');
         $id_regu    = $request->id_regu;
-
+        
         if($id_regu == '5'){
-            $jadwal = JadwalShift::where('id_regu', $id_regu)
-                    ->first();
+            if($hari != "Saturday" && $hari != "Sunday"){
+                $jadwal = JadwalShift::where('id_regu', $id_regu)->where('action','ND')->first();
+                if($response->id_jabatan == 126 || $response->id_jabatan == 127){
+                    $jadwal->jam_masuk = Carbon::parse($jadwal->jam_masuk)->minHour()->isoFormat('hh:mm:ss'); 
+                    $jadwal->jam_keluar = Carbon::parse($jadwal->jam_keluar)->minHour()->isoFormat('hh:mm:ss');
+                }
+            }else{
+                $jadwal = JadwalShift::where('id_regu', $id_regu)->where('action','OFF')->first();
+            }
         }
         else{
             $jadwal = JadwalShift::where('tanggal', $tanggal)
@@ -52,12 +59,12 @@ class CheckinController extends Controller
                     ->where('tahun', $tahun)
                     ->where('id_regu', $id_regu)
                     ->first();
+            $jadwal->jam_masuk = Carbon::parse($jadwal->jam_masuk)->addHour()->isoFormat('hh:mm:ss'); 
+            $jadwal->jam_keluar = Carbon::parse($jadwal->jam_keluar)->addHour()->isoFormat('hh:mm:ss');
         }
-
-
         return response()->json([
             'karyawan' => $response,
-            'jadwal' => $jadwal,
+            'jadwal' => $jadwal
         ]);
     }
     public function check_in(Request $request)
@@ -115,10 +122,40 @@ class CheckinController extends Controller
         })->first();
 
         $checkout = DB::table('presensi_logs')->where('nik', $request->nik)->whereDate('tanggal',date('Y-m-d'))->where('status','!=','off_duty')->first();
+        $tanggal    = Carbon::now()->isoFormat('D');
+        $hari    = Carbon::now()->isoFormat('l');
+        $bulan      = Carbon::now()->isoFormat('M');
+        $tahun      = Carbon::now()->isoFormat('Y');
+        $waktu = Carbon::now()->isoFormat('D/M/Y H:m:s');
+        
+        $campur = Carbon::now()->isoFormat('D/M/Y');
+        $now = Carbon::now()->format('H:m:s');
+        $user =  User::with('karyawan')->where('nik',$request->nik)->first();
+        $id_regu = $user->karyawan->id_regu;
 
+        if($id_regu == '5'){
+            if($hari != "Saturday" && $hari != "Sunday"){
+                $jadwal = JadwalShift::where('id_regu', $id_regu)->where('action','ND')->first();
+                if($user->karyawan->id_jabatan == 126 || $user->karyawan->id_jabatan == 127){
+                    $jadwal->jam_masuk = Carbon::parse($jadwal->jam_masuk)->minHour()->isoFormat('hh:mm:ss'); 
+                    $jadwal->jam_keluar = Carbon::parse($jadwal->jam_keluar)->minHour()->isoFormat('hh:mm:ss');
+                }
+            }else{
+                $jadwal = JadwalShift::where('id_regu', $id_regu)->where('action','OFF')->first();
+            }
+        }
+        else{
+            $jadwal = JadwalShift::where('tanggal', $tanggal)
+                    ->where('bulan', $bulan)
+                    ->where('tahun', $tahun)
+                    ->where('id_regu', $id_regu)
+                    ->first();
+            $jadwal->jam_masuk = Carbon::parse($jadwal->jam_masuk)->addHour()->isoFormat('hh:mm:ss'); 
+            $jadwal->jam_keluar = Carbon::parse($jadwal->jam_keluar)->addHour()->isoFormat('hh:mm:ss');
+        }
         return response()->json([
             'checkin' => is_null($checkin) ? true : false,
-            'checkout' => is_null($checkout) ? false : true,
+            'checkout' => (!is_null($checkout) && $now >= $jadwal->jam_keluar) ? true : false,
         ], Response::HTTP_OK);
     }
 

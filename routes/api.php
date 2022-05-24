@@ -19,6 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('login', 'AuthController@authenticate');
+Route::post('user/change_password','AuthController@change_password');
 
 Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('test', function(){
@@ -31,6 +32,9 @@ Route::get('cek', function(){
 });
 
 Route::get('laporan/pencarian', 'LaporanController@pencarian');
+Route::get('laporan/all', 'LaporanController@all');
+Route::get('laporan/by_user', 'LaporanController@by_user');
+Route::get('laporan/status','LaporanController@status_laporan');
 Route::resource('laporan', 'LaporanController');
 Route::get('user/get_user','CheckinController@get_user');
 Route::post('user/checkin','CheckinController@check_in');
@@ -61,3 +65,8 @@ Route::get('user/list_lembur_detail','AbsenController@list_lembur_detail');
 Route::get('user/list_lembur_khusus','AbsenController@list_lembur_khusus');
 Route::get('user/list_lembur_khusus_detail','AbsenController@list_lembur_khusus_detail');
 
+//notifikasi
+Route::get('user/notifikasi','AuthController@get_notifikasi');
+
+//get berita
+Route::get('berita','LaporanController@berita');

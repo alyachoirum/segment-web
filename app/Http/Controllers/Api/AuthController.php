@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use JWTAuth;
 use Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -25,7 +27,7 @@ class AuthController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 401);
         }
 
         //Request is valid, create new user
@@ -55,7 +57,32 @@ class AuthController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            $faileds = $validator->failed();
+            // dd($faileds);
+            if(isset($faileds["nik"])){
+                return response()->json([
+                    'success' => false,
+                    'message' => "NIK tidak boleh kosong"], 401);
+            }
+            if(isset($faileds["password"])){
+                if(isset($faileds["password"]["Min"])){
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Password minimal 6 karakter"], 401);
+                }
+                if(isset($faileds["password"]["Max"])){
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Password maksimal 50 karakter"], 401);
+                }
+                return response()->json([
+                    'success' => false,
+                    'message' => "Password tidak boleh kosong"], 401);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => "Sedang terjadi kesalahan"], 401);
         }
 
         //Request is validated
@@ -122,5 +149,92 @@ class AuthController extends Controller
         $user = JWTAuth::authenticate($request->token);
 
         return response()->json(['user' => $user]);
+    }
+
+    public function notifikasi(Request $request)
+    {
+        $nik = $request->nik;
+        $user = User::where('nik',$nik)->first();
+        $notifikasi = DB::table('notifikasis')
+            ->where('user_id_penerima', $user->id_user)
+            ->orderBy('created_at','desc')
+            ->get();
+        dd($notifikasi);
+
+    }
+
+    public function get_notifikasi(Request $request)
+    {
+        $nik = $request->nik;
+        $user = User::where('nik',$nik)->first();
+        $notifikasi = DB::table('notifikasis')->where('user_id_penerima',$user->id_user)->limit(5)->orderBy('created_at','desc')->get();
+        $jumlah_notif = DB::table('notifikasis')->where('user_id_penerima',$user->id_user)->limit(5)->count();
+
+        return response()->json([
+            'notifikasi'=>$notifikasi,
+            'jumlah_notif'=>$jumlah_notif,
+        ]);
+    }
+
+    public function change_password(Request $request){
+        $data = $request->only('nik', 'password', 'newpassword','confirmpassword');
+        
+        $validator = Validator::make($data, [
+            'nik' => 'required',
+            'password' => 'required',
+            'newpassword' => 'required',
+            'confirmpassword' => 'required',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kolom isian tidak lengkap',
+
+            ], 400);
+        }
+        
+
+        try{
+            $nik = $request->nik;
+            $password = $request->password;
+            $newpassword = $request->newpassword;
+            $confirmpassword = $request->confirmpassword;
+            if($newpassword != $confirmpassword){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password baru tidak sama',
+    
+                ], 400);
+            }
+            $user = User::where('nik',$nik)->first();
+            $cek = Hash::check($password,$user->password);
+            if($cek){
+                User::where('nik',$nik)->update(['password'=>bcrypt($newpassword)]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sukses mengganti password',
+    
+                ], 201);
+
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password salah',
+    
+                ], 400);
+
+            }
+
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+                'error' => $e
+
+            ], 400);
+        }
     }
 }

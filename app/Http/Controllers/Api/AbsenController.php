@@ -26,7 +26,17 @@ class AbsenController extends Controller
 {
     public function cuti_submit(Request $request)
     {
+        
         try{
+            $month = Carbon::now()->isoFormat('Y-M');
+            $cek = AbsensiLog::where('nik', $request->nik)->where('terbit',1)->where('reject',0)->with('karyawan')->where('tgl_absen', 'like','%'.$month)->get();
+            if(count($cek) >= 2){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Submit Gagal,Anda sudah melakukan cuti 2 kali dalam sebulan',
+    
+                ], 200);
+            }
             $absensi                        = new AbsensiLog();
             $absensi->nik                   = $request->nik;
             $absensi->tgl_absen             = $request->tgl_absen;
@@ -55,13 +65,26 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
     }
 
     public function dispensasi_submit(Request $request)
     {
         try{
+            $month = Carbon::now()->isoFormat('Y-M');
+            $cek = AbsensiLog::where('nik', $request->nik)->where('terbit',1)->where('reject',0)->with('karyawan')->where('tgl_absen', 'like','%'.$month)->get();
+            if(count($cek) >= 2){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Submit Gagal,Anda sudah melakukan cuti 2 kali dalam sebulan',
+    
+                ], 200);
+            }
             $absensi                        = new AbsensiLog();
             $absensi->nik                   = $request->nik;
             $absensi->tgl_absen             = $request->tgl_absen;
@@ -90,13 +113,26 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
     }
 
     public function ijin_submit(Request $request)
     {
         try{
+            $month = Carbon::now()->isoFormat('Y-M');
+            $cek = AbsensiLog::where('nik', $request->nik)->where('terbit',1)->where('reject',0)->with('karyawan')->where('tgl_absen', 'like','%'.$month)->get();
+            if(count($cek) >= 2){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Submit Gagal,Anda sudah melakukan cuti 2 kali dalam sebulan',
+    
+                ], 200);
+            }
             $absensi                        = new AbsensiLog();
             $absensi->nik                   = $request->nik;
             $absensi->tgl_absen             = $request->tgl_absen;
@@ -125,13 +161,26 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
     }
 
     public function sakit_submit(Request $request)
     {
         try{
+            $month = Carbon::now()->isoFormat('Y-M');
+            $cek = AbsensiLog::where('nik', $request->nik)->where('terbit',1)->where('reject',0)->with('karyawan')->where('tgl_absen', 'like','%'.$month)->get();
+            if(count($cek) >= 2){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Submit Gagal,Anda sudah melakukan cuti 2 kali dalam sebulan',
+    
+                ], 200);
+            }
             $foto = $request->foto;
 
             $name = time().".jpg";
@@ -171,7 +220,11 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
 
     }
@@ -179,6 +232,15 @@ class AbsenController extends Controller
     public function lembur_submit(Request $request)
     {
         try{
+            $month = Carbon::now()->isoFormat('Y-M');
+            $total_lembur_validasi = Lembur::where('nik', $request->nik)->where('terbit',1)->where('reject',0)->with('karyawan')->where('tgl_lembur', 'like','%'.$month)->sum('total_jam_lembur');
+            if($total_lembur_validasi >= 20){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Submit Gagal,Anda sudah melakukan lembur selama 20 jam dalam sebulan',
+    
+                ], 200);
+            }
             $lembur                        = new Lembur();
             $lembur->nik                   = $request->nik;
             $lembur->tgl_lembur            = $request->tgl_lembur;
@@ -207,7 +269,11 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
     }
 
@@ -295,7 +361,11 @@ class AbsenController extends Controller
 
         }
         catch(\Exception $e){
-            return response()->json($e, 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi Kesalahan',
+
+            ], 400);
         }
     }
 
@@ -473,14 +543,52 @@ class AbsenController extends Controller
     }
 
     public function get_jadwal(Request $request){
+        //126,127
+        $user = User::with('karyawan')->where('nik',$request->nik)->first();
+        if($request->id_regu == "5" || $request->id_regu == 5){
+            $listJadwal = Array();
+            for($tanggal=1;$tanggal<=31;$tanggal++){
+                try{
+                    $tgl_lengkap = strval($request->bulan)."/".strval($tanggal)."/".strval($request->tahun);
+                    $date = Carbon::parse($tgl_lengkap)->format('l'); 
+                    if($date != "Saturday" && $date != "Sunday"){
+                        $jadwal=Array(
+                            "id_jadwal" => $tanggal,
+                            "tanggal" => $tanggal,
+                            "bulan" => $request->bulan,
+                            "tahun" => $request->tahun,
+                            "id_regu"=> $request->id_regu,
+                            "pattern_number"=> "0",
+                            "jam_masuk" => "07:00:00",
+                            "jam_keluar"=> "16:00:00",
+                            "action"=> "ND",
+                            "created_at"=> null,
+                            "updated_at"=>null
+                        );
+                        if($user->karyawan->id_jabatan == 126 || $user->karyawan->id_jabatan == 127){
+                            $jadwal["jam_masuk"] = "06:00:00";
+                            $jadwal["jam_keluar"] = "15:00:00";
+                        }
+                        array_push($listJadwal,$jadwal);
+                    }
+                }catch (\Carbon\Exceptions\InvalidFormatException $e) {
+                    // dd($tanggal);
+                }
+            }
+            return response()->json($listJadwal);
+        }
         $jadwal = JadwalShift::where('bulan',$request->bulan)
                 ->where('tahun',$request->tahun)
-                ->where('id_regu', $request->id_regu)->get();
-        $action = $jadwal[0]->action;
-        $jam_masuk = $jadwal[0]->jam_masuk;
-        $jam_keluar = $jadwal[0]->jam_keluar;
+                ->where('id_regu', $request->id_regu)
+                ->where('action','!=','OFF')->get();
+        // dd($jadwal);
+        $jadwalUpdate = $jadwal->map(function($item){
+            $item->jam_masuk = Carbon::createFromFormat('H:m:s',  $item->jam_masuk)->addHour()->isoFormat('H:mm:ss'); 
+            $item->jam_keluar = Carbon::createFromFormat('H:m:s',  $item->jam_keluar)->addHour()->isoFormat('H:mm:ss');
+            // dd($waktu);
+        });
+        // dd($jadwal);
 
-        $jadwale = "|$action| $jam_masuk - $jam_keluar";
         return response()->json($jadwal);
     }
 

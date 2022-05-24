@@ -213,7 +213,6 @@ class UserController extends Controller
             'notifikasi'=>$notifikasi,
             'jumlah_notif'=>$jumlah_notif,
         ]);
-
     }
 
     public function data_pelaksana(){
